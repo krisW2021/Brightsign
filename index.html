@@ -2,43 +2,200 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>BrightSign Countdown</title>
+    <title>Walmart Deals Countdown</title>
     <style>
-        html, body { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: hidden; 
-            background-color: #111111; 
-        }
-        #countdown {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        html, body {
+            margin: 0;
+            padding: 0;
             width: 100%;
             height: 100%;
-            color: #ffffff; 
-            font-family: Arial, sans-serif; 
-            font-size: 80px; 
-            font-weight: bold;
-            text-align: center; 
+            overflow: hidden;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #001e60;
+        }
+
+        .banner {
+            width: 100%;
+            height: 70%;
+            background: linear-gradient(90deg, #001e60 0%, #0071ce 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 0 60px;
+            color: #ffffff;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 26px;
+            flex-shrink: 0;
+        }
+
+        .spark-logo {
+            height: 64px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .deals-tag {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 22px 30px;
+            flex-shrink: 0;
+        }
+
+        .deals-badge {
+            background: #001440;
+            color: #ffffff;
+            border-radius: 10px;
+            padding: 14px 22px;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1.1;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .deals-date {
+            font-weight: 800;
+            font-size: 28px;
+            line-height: 1.1;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .headline {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .headline h1 {
+            margin: 0;
+            font-size: 46px;
+            font-weight: 800;
+        }
+
+        .headline p {
+            margin: 10px 0 0;
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .spacer {
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .countdown-bar {
+            width: 100%;
+            height: 30%;
+            background: #0071ce;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+        }
+
+        .countdown-label {
+            font-size: 34px;
+            font-weight: 800;
+            margin-right: 30px;
+        }
+
+        .countdown-values {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .segment {
+            text-align: center;
+            margin: 0 12px;
+            min-width: 70px;
+        }
+
+        .segment .num {
+            font-size: 52px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .segment .unit {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .colon {
+            font-size: 52px;
+            font-weight: 800;
+            margin: 0 2px;
         }
     </style>
 </head>
 <body>
-    <div id="countdown">Loading Countdown...</div>
+    <div class="banner">
+        <div class="brand-group">
+            <img class="spark-logo" src="spark-logo.png" alt="Walmart Spark">
+            <div class="deals-tag">
+                <div class="deals-badge">Deals<br>&amp; More</div>
+                <div class="deals-date">Oct. 5&ndash;11<br>Only!</div>
+            </div>
+        </div>
+        <div class="headline">
+            <h1>Heads up&mdash;big Deals coming!</h1>
+            <p>All the good stuff, 10/5 at 12am ET.</p>
+        </div>
+        <div class="spacer"></div>
+    </div>
+
+    <div class="countdown-bar" id="countdown-bar">
+        <div class="countdown-label">Deals start in</div>
+        <div class="countdown-values">
+            <div class="segment">
+                <div class="num" id="days">00</div>
+                <div class="unit">days</div>
+            </div>
+            <div class="colon">:</div>
+            <div class="segment">
+                <div class="num" id="hours">00</div>
+                <div class="unit">hours</div>
+            </div>
+            <div class="colon">:</div>
+            <div class="segment">
+                <div class="num" id="mins">00</div>
+                <div class="unit">mins</div>
+            </div>
+            <div class="colon">:</div>
+            <div class="segment">
+                <div class="num" id="secs">00</div>
+                <div class="unit">secs</div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // TARGET DATE: Change this to your actual event date (YYYY-MM-DDTHH:MM:SS)
-        const targetDate = new Date("2026-10-04T23:59:59").getTime();
+        // TARGET DATE: Walmart October Sale - Midnight Eastern Time, Oct 5, 2026
+        // Fixed at -04:00 (EDT) so it's correct regardless of the player's own clock/timezone
+        const targetDate = new Date("2026-10-05T00:00:00-04:00").getTime();
+
+        function pad(n) {
+            return n.toString().padStart(2, "0");
+        }
 
         function updateCountdown() {
             const now = new Date().getTime();
             const difference = targetDate - now;
 
             if (difference < 0) {
-                document.getElementById("countdown").innerHTML = "Event Started!";
+                document.getElementById("countdown-bar").innerHTML =
+                    '<div class="countdown-label">Deals are live now!</div>';
                 return;
             }
 
@@ -47,7 +204,10 @@
             const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-            document.getElementById("countdown").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+            document.getElementById("days").textContent = pad(days);
+            document.getElementById("hours").textContent = pad(hours);
+            document.getElementById("mins").textContent = pad(minutes);
+            document.getElementById("secs").textContent = pad(seconds);
         }
 
         // Run immediately, then update every 1 second
@@ -56,4 +216,3 @@
     </script>
 </body>
 </html>
-
