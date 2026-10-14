@@ -52,8 +52,8 @@
     .clock-card {
       position: relative; width: min(94vw, 1100px); padding: clamp(3rem, 9vw, 8rem) 2rem;
       border: 1px solid rgba(255,255,255,.25); border-radius: 2rem;
-      background: rgba(0, 37, 76, .38); box-shadow: 0 2rem 6rem rgba(0, 18, 42, .35), inset 0 1px rgba(255,255,255,.12);
-      backdrop-filter: blur(12px); overflow: hidden;
+      background: rgba(0, 37, 76, .72); box-shadow: 0 2rem 6rem rgba(0, 18, 42, .35), inset 0 1px rgba(255,255,255,.12);
+      overflow: hidden;
     }
     .clock-card::after { position: absolute; inset: 0; content: ""; pointer-events: none; background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.09), transparent 70%); transform: translateX(-100%); animation: sheen 8s infinite; }
     .eyebrow { margin: 0 0 1.4rem; color: var(--yellow); font-size: clamp(1rem, 1.8vw, 1.3rem); font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
@@ -62,10 +62,13 @@
     #timezone { margin: 2rem 0 0; color: var(--muted); font-size: clamp(1.1rem, 2vw, 1.35rem); }
 
     .floaters { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
-    .floater { position: absolute; opacity: .8; color: var(--yellow); animation: drift var(--duration) linear infinite; animation-delay: var(--delay); }
+    .floater { position: absolute; opacity: .8; color: var(--yellow); animation: drift var(--duration) linear infinite; animation-delay: var(--delay); will-change: transform; }
     .floater.star { width: 2rem; height: 2rem; background: currentColor; clip-path: polygon(50% 0%, 61% 38%, 100% 50%, 61% 62%, 50% 100%, 39% 62%, 0% 50%, 39% 38%); }
     .floater.cart { color: var(--light-blue); font-size: 2.6rem; filter: drop-shadow(0 0 8px currentColor); }
     .floater.box { width: 1.8rem; height: 1.8rem; border: 3px solid var(--light-blue); transform: rotate(45deg); }
+    .brightsign-mode .clock-card::after { display: none; }
+    .brightsign-mode .clock-card { box-shadow: 0 1rem 3rem rgba(0, 18, 42, .35), inset 0 1px rgba(255,255,255,.12); }
+    .brightsign-mode .floater { filter: none; }
 
     @keyframes drift { from { transform: translate3d(0, 110vh, 0) rotate(0deg) scale(.5); } to { transform: translate3d(var(--sway), -20vh, 0) rotate(360deg) scale(1.2); } }
     @keyframes sheen { 0%, 55% { transform: translateX(-100%); } 75%, 100% { transform: translateX(100%); } }
@@ -98,27 +101,33 @@
     </main>
   </div>
 
-  <script>
+    <script>
+    const isBrightSign = /BrightSign/i.test(navigator.userAgent);
+    if (isBrightSign) document.documentElement.className = 'brightsign-mode';
+
     const clock = document.querySelector('#clock');
     const ampm = document.querySelector('#ampm');
     const date = document.querySelector('#date');
     const zone = document.querySelector('#timezone');
     const timeFormatter = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
     const dateFormatter = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone.split('_').join(' ');
 
     function updateClock() {
       const now = new Date();
-      const parts = timeFormatter.formatToParts(now);
-      const get = type => parts.find(part => part.type === type)?.value || '';
-      clock.firstChild.nodeValue = `${get('hour')}:${get('minute')}:${get('second')}`;
-      ampm.textContent = get('dayPeriod');
+      const formattedTime = timeFormatter.format(now);
+      const separator = formattedTime.lastIndexOf(':');
+      const timeWithoutSeconds = formattedTime.substring(0, separator);
+      const secondsAndPeriod = formattedTime.substring(separator + 1).trim().split(' ');
+      clock.firstChild.nodeValue = timeWithoutSeconds + ':' + secondsAndPeriod[0];
+      ampm.textContent = secondsAndPeriod.slice(1).join(' ');
       date.textContent = dateFormatter.format(now);
       date.dateTime = now.toISOString();
-      zone.textContent = `${Intl.DateTimeFormat().resolvedOptions().timeZone.replaceAll('_', ' ')} · Your local time`;
+      zone.textContent = timeZone + ' · Your local time';
+      setTimeout(updateClock, 1025 - (Date.now() % 1000));
     }
 
     updateClock();
-    setInterval(updateClock, 1000);
   </script>
 </body>
 </html>
